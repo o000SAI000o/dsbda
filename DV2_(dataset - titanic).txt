@@ -1,0 +1,37 @@
+#Assignment 9
+'''Data Visualization II 1. Use the inbuilt dataset 'titanic' as used in the 
+above problem. Plot a box plot for distribution of age with respect to each gender along with the 
+information about whether they survived or not. (Column names : 'sex' and 'age') Write 
+observations on the inference from the above statistics.'''
+
+
+# Importing required libraries
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Loading the dataset
+data = pd.read_csv('https://raw.githubusercontent.com/dphi-official/Datasets/master/titanic_data.csv')
+
+# Checking missing values
+print(data.isnull().sum())
+
+# Handling missing values
+data['Age'] = data['Age'].fillna(data['Age'].mean())
+data['Cabin'] = data['Cabin'].fillna(data['Cabin'].mode()[0])
+data['Embarked'] = data['Embarked'].fillna(data['Embarked'].mode()[0])
+
+# Checking again for missing values
+print(data.isnull().sum())
+
+# Plotting the boxplot correctly
+plt.figure(figsize=(10,6))
+sns.boxplot(x='Sex', y='Age', hue='Survived', data=data, palette='Set2')
+plt.title('Distribution of Age with Respect to Gender and Survival Status')
+plt.xlabel('Gender')
+plt.ylabel('Age')
+plt.grid(axis='y')
+plt.legend(title='Survived', labels=['No', 'Yes'])
+plt.show()
+

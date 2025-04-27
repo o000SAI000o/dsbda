@@ -1,0 +1,103 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+data =sns.load_dataset('titanic')
+print(data)
+
+print(data.shape)
+
+print(data.describe())
+
+print(data.info())
+
+print(data.describe(include = 'object'))
+
+print(data.isnull().sum())
+
+print(data.columns)
+
+data['age'] = data['age'].fillna(data['age'].mean())
+
+data['deck'] = data['deck'].fillna(data['deck'].mode()[0])
+
+data['embarked'] = data['embarked'].fillna(data['embarked'].mode()[0])
+
+print(data.isnull().sum())
+
+sns.countplot(x = data['survived'])
+plt.show()
+
+sns.countplot(x = data['pclass'])
+plt.show()
+
+sns.countplot(x = data['embarked'])
+plt.show()
+
+sns.countplot(x = data['sex'])
+plt.show()
+
+sns.boxplot(x = data['age'])
+plt.show()
+
+sns.boxplot(x = data['fare'])
+plt.show()
+
+sns.boxplot(x = data['pclass'])
+plt.show()
+
+sns.boxplot(x= data['sibsp'])
+plt.show()
+
+sns.catplot(x= 'pclass', y = 'age', data=data, kind = 'box')
+plt.show()
+
+sns.catplot(x= 'pclass', y = 'fare', data=data, kind = 'strip')
+plt.show()
+
+sns.catplot(x= 'sex', y = 'fare', data=data, kind = 'strip')
+plt.show()
+
+sns.catplot(x= 'sex', y = 'age', data=data, kind = 'strip')
+plt.show()
+
+sns.pairplot(data)
+plt.show()
+
+sns.scatterplot(x = 'fare', y = 'pclass', hue = 'survived', data = data)
+plt.show()
+
+sns.scatterplot(x = 'survived', y = 'fare', data = data)
+plt.show()
+
+sns.distplot(data['age'])
+plt.show()
+
+sns.distplot(data['fare'])
+plt.show()
+
+sns.jointplot(x = 'survived', y = 'fare', kind = "scatter", data = data)
+plt.show()
+
+tc = data.select_dtypes(include=['number']).corr()
+sns.heatmap(tc, cmap="YlGnBu")
+plt.title('Correlation')
+plt.show()
+
+sns.catplot(x='pclass', y='fare', data=data, kind='bar')
+plt.show()
+
+# Plot histogram for 'fare'
+plt.figure(figsize=(10, 6))
+sns.histplot(data['fare'], bins=30, kde=True, color='skyblue')
+
+
+# Adding titles and labels
+plt.title('Distribution of Ticket Fare on Titanic', fontsize=16)
+plt.xlabel('fare', fontsize=14)
+plt.ylabel('Number of Passengers', fontsize=14)
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.show()
+

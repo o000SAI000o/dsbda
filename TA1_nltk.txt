@@ -1,0 +1,70 @@
+#Assignment6
+'''Text Analytics 1. Extract Sample document and apply following 
+document preprocessing methods: Tokenization, POS Tagging, stop words removal, Stemming 
+and Lemmatization. Create representation of document by calculating Term Frequency and 
+Inverse Document Frequency'''
+
+# Import necessary libraries
+import nltk
+from nltk import sent_tokenize, word_tokenize, pos_tag
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+import string
+
+# Download required NLTK data
+nltk.download('punkt_tab')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger_eng')
+nltk.download('stopwords')
+
+# Sample document
+text = """Real Madrid is set to win the UCL for the season. Benzema might win Ballon d'Or. 
+Salah might be the runner-up."""
+
+# 1. Sentence Tokenization
+sentence_tokens = sent_tokenize(text)
+print("\nSentence Tokenization:")
+print(sentence_tokens)
+
+#2 word tokenization
+word_tokens = word_tokenize(text)
+print("\nWord Tokenization:")
+print(word_tokens)
+
+# 3. POS Tagging
+pos_tags = pos_tag(word_tokens)
+print("\nPart of speech(pos) Tagging:")
+print(pos_tags)
+
+# 4. Stop Words Removal
+stop_words = set(stopwords.words('english'))
+filtered_words = [word for word in word_tokens if word.lower() not in stop_words and word not in string.punctuation]
+print("\nAfter stop words removal:")
+print(filtered_words)
+
+# 5. Stemming
+ps = PorterStemmer()
+stemmed_words = [ps.stem(word) for word in filtered_words]
+print("\nAfter stemming")
+print(stemmed_words)
+
+# 6. Lemmatization
+lemmatizer = WordNetLemmatizer()
+lemmatized_words = [lemmatizer.lemmatize(word.lower()) for word in filtered_words]
+print("\nAfter Lemmatization:")
+print(lemmatized_words)
+
+# Create cleaned text for TF-IDF
+cleaned_text = ' '.join(lemmatized_words)
+
+# 7. Term Frequency (TF) and Inverse Document Frequency (IDF)
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform([cleaned_text])
+
+
+print("\nTF-IDF Representation:")
+feature_names = vectorizer.get_feature_names_out()
+for col in range(tfidf_matrix.shape[1]):
+          print(f"{feature_names[col]}: {tfidf_matrix[0, col]:.4f}")
+

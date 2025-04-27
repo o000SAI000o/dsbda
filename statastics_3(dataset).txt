@@ -1,0 +1,60 @@
+# ASSIGNMENT 3
+# Perform the following operations on any open source dataset (e.g., data.csv)
+# Provide summary statistics (mean, median, minimum, maximum, standard deviation) for a dataset (age, income etc.) with numeric variables grouped by one of the qualitative (categorical) variable. For example, if your categorical variable is age groups and quantitative variable is income, then provide summary statistics of income grouped by the age groups. Create a list that contains a numeric value for each response to the categorical variable.
+# Write a Python program to display some basic statistical details like percentile, mean, standard deviation etc. of the species of ‘Iris-setosa’, ‘Iris-versicolor’ and ‘Iris-versicolor’ of iris.csv dataset.
+# Provide the codes with outputs and explain everything that you do in this step.
+
+import numpy as np
+import pandas as pd
+import sklearn
+from sklearn import datasets
+
+
+# Load the iris dataset
+iris = datasets.load_iris()
+
+
+# Create DataFrame with feature columns
+df = pd.DataFrame(iris["data"], columns=['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm'])
+
+
+# Add target (Species) column
+df['Species'] = iris['target']
+df['Species'] = df['Species'].map({0: 'Iris-setosa', 1: 'Iris-versicolor', 2: 'Iris-virginica'})
+
+
+# Display the first few rows
+print("First few rows of the dataset:")
+print(df.head())
+
+
+# 1. Group by 'Species' and calculate summary statistics (mean, median, min, max, std, percentiles)
+summary_stats = df.groupby('Species').describe().T
+print("\nSummary statistics grouped by Species:")
+print(summary_stats)
+
+
+# 2. Calculate specific statistics for each species using 'agg' function
+species_stats = df.groupby('Species').agg(
+    Mean=('SepalLengthCm', 'mean'),
+    Median=('SepalLengthCm', 'median'),
+    Min=('SepalLengthCm', 'min'),
+    Max=('SepalLengthCm', 'max'),
+    Std_Dev=('SepalLengthCm', 'std'),
+    Percentile_25=('SepalLengthCm', lambda x: np.percentile(x, 25)),
+    Percentile_75=('SepalLengthCm', lambda x: np.percentile(x, 75)),
+)
+
+# You can repeat the same for other columns (e.g., SepalWidthCm, PetalLengthCm, PetalWidthCm) if needed
+
+print("\nBasic statistical details (mean, median, min, max, std, percentiles) for each species:")
+print(species_stats)
+
+
+# 3. Display standard deviation for each numeric feature in the dataset
+numeric_columns = df.select_dtypes(include=['float64', 'int64'])  # Select only numeric columns
+std_devs = numeric_columns.std()  # Calculate standard deviation for numeric columns
+print("\nStandard deviations for each numeric feature:")
+print(std_devs)
+
+

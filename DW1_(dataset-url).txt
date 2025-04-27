@@ -1,0 +1,158 @@
+#assignment 1
+#Import the required libraries
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+from sklearn.preprocessing import LabelEncoder
+
+#Load the dataset using pandas library
+df = pd.read_csv("autodata.csv")
+print(df)
+
+#Check the contents of dataset using df.head() and df.tail() functions
+print(df.head(10))
+print(df.tail(10).to_string())
+print(df.sample(10))
+print(df.shape)
+print(df.info())
+print(df.describe())
+
+
+#There are two methods to detect missing data:
+#isnull()
+#notnull()
+
+print(df.isnull())
+print(df.isnull().sum())
+
+print(df.notnull())
+print(df.notnull().sum())
+
+# stroke : 4 missing data
+# horsepower: 2 missing data
+# peak-rpm: 2 missing data
+# horsepower-binned: 2 missing data
+
+
+
+# calculate the mean value for "stroke" column
+avg_stroke = df["stroke"].astype("float").mean()
+print("Average of stroke:", avg_stroke)
+
+# replace NaN by mean value in "stroke" column
+df["stroke"].replace(np.nan, avg_stroke, inplace=True)
+
+
+#Calculate the mean value for the 'horsepower' column:
+avg_hp = df["horsepower"].astype("float").mean()
+print("Average of stroke:", avg_hp)
+
+#Replace "NaN" by mean value:
+df["horsepower"].replace(np.nan, avg_hp, inplace = True)
+
+#Calculate the mean value for 'peak-rpm' column:
+avg_rpm = df["peak-rpm"].astype("float").mean()
+print("Average of stroke:", avg_rpm)
+    
+#Replace NaN by mean value:
+df["peak-rpm"].replace(np.nan, avg_rpm, inplace = True)
+
+# #calculating frequent values
+df['num-of-doors'].value_counts()
+df['num-of-doors'].value_counts().idxmax()
+
+freq_val = df["num-of-doors"].mode()
+print(freq_val)
+
+#replace the missing 'num-of-doors' values by the most frequent 
+df["num-of-doors"].replace(np.nan, "four", inplace=True)
+
+# simply drop whole row with NaN in "horsepower-binned" column
+df.dropna(subset=["horsepower-binned"],axis=0,inplace=True)
+
+# reset index, because we droped two rows
+df.reset_index(drop=True, inplace=True)
+
+df.isnull().sum()
+
+# Part-2
+# Data Standardization
+df['city-L/100km'] = 235/df["city-mpg"]
+df.head()
+
+df['highway-L/100km'] = 235/df["highway-mpg"]
+df.head()
+
+# Data Normalization
+# Normalization is the process of transforming values of several variables into a similar range. Typical normalizations include scaling the variable so the variable average is 0, scaling the variable so the variance is 1, or scaling variable so the variable values range from 0 to 1
+
+df["length"] = df["length"]/df["length"].max()
+df["width"] = df["width"]/df["width"].max()
+df['height'] = df['height']/df['height'].max() 
+df[["length","width","height"]].head()
+
+
+df.columns
+
+
+# Binning
+# Binning is a process of transforming continuous numerical variables into discrete categorical 'bins', for grouped analysis.
+
+# Example:
+
+# In our dataset, "horsepower" is a real valued variable ranging from 48 to 288, it has 57 unique values. What if we only care about the price difference between cars with high horsepower, medium horsepower, and little horsepower (3 types)? Can we rearrange them into three ‘bins' to simplify analysis?
+df["horsepower"] = df["horsepower"].astype(float,copy = True)
+
+plt.hist(df["horsepower"])
+plt.xlabel("horsepower")
+plt.ylabel("count")
+plt.title("horsepower")
+
+
+bins = np.linspace(min(df["horsepower"]),max(df["horsepower"]),4)
+print(bins)
+
+group_names = ['Low', 'Medium', 'High']
+
+df['horsepower-binned'] = pd.cut(df['horsepower'], bins, labels=group_names, include_lowest=True )
+df[['horsepower','horsepower-binned']].head(20)
+     
+# Label Encoding for ordinal 'horsepower-binned' column
+# We turn 'Low', 'Medium', 'High' into 0, 1, 2
+label_encoder = LabelEncoder()
+df['horsepower-binned'] = label_encoder.fit_transform(df['horsepower-binned'])
+print(df[['horsepower-binned']].head(10))
+
+# Plot Bar for 'horsepower-binned'
+plt.bar(group_names, df["horsepower-binned"].value_counts())
+plt.xlabel("horsepower")
+plt.ylabel("count")
+plt.title("horsepower bins after outlier removal")
+plt.show()
+
+# Peak-RPM Distribution Plot
+plt.hist(df["peak-rpm"])
+plt.xlabel("peak-rpm")
+plt.ylabel("count")
+plt.title("Peak-rpm bins")
+plt.show()
+
+# Outlier Detection using IQR (Interquartile Range)
+def detect_outliers(df, column):
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    return df[(df[column] < lower_bound) | (df[column] > upper_bound)]
+
+# Detecting outliers in 'horsepower' column
+horsepower_outliers = detect_outliers(df, "horsepower")
+print(f"Outliers in horsepower:\n{horsepower_outliers[['horsepower']]}\n")
+
+# Removing outliers from 'horsepower' column
+df = df[~df["horsepower"].isin(horsepower_outliers["horsepower"])]
+print(f"Data after removing outliers in horsepower:\n{df[['horsepower']].describe()}\n")

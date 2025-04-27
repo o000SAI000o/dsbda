@@ -1,0 +1,119 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+df = pd.read_csv("Social_Network_Ads.csv")
+
+print(df.shape)
+
+print(df.head())
+
+df.drop(['User ID'],axis=1,inplace=True)
+print(df.head())
+#df: your DataFrame (your table of data).
+# drop(): a function to remove rows or columns from a DataFrame.
+# ['User ID']: the column name you want to drop (remove).
+# axis=1:
+    # axis=0 → drop rows
+    # axis=1 → drop columns → you are removing a column here.
+# inplace=True:
+    # If True → change df directly (no need to assign it back).
+    # If it was inplace=False, you would have to write df = df.drop(...).
+
+print(df.Purchased.value_counts())
+
+print(df.Gender.value_counts())
+
+print(df.dtypes)
+
+print(df.isnull().sum())
+
+print(df.describe())
+
+g = sns.catplot(x = "Gender",y="Purchased",data=df,kind="bar",height=4)
+g.set_ylabels("Purchased Probability")
+plt.show()
+
+M2 = pd.crosstab(df.Gender, df.Purchased,normalize="index")
+print(M2)
+M2.plot.bar(figsize=(6,4),stacked=True)
+plt.legend(title='Gender vs Purchased', loc='upper right')
+plt.show()
+
+corr = df.select_dtypes(include=['number']).corr()
+
+# 1. corr = df.corr()
+# Calculates the correlation matrix for your DataFrame df.
+# Correlation measures how strongly two variables are related:
+# Value close to 1 → Strong positive relationship
+# Value close to -1 → Strong negative relationship
+# Value around 0 → No relationship
+
+print(corr.shape)
+plt.figure(figsize=(8,8))
+sns.heatmap(corr, cbar=True, square=True, fmt = '.1f', annot=True, annot_kws = {'size':12},cmap = 'Greens')
+
+#Get Input Variable into X and Outcome variable into Y
+X = df.drop(['Gender','Purchased'],axis=1)
+Y= df['Purchased']
+print(X.head())
+
+#Split the data into Train set and Test set
+from sklearn.model_selection import train_test_split
+# Shuffle and split the data into training and testing subsets
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.2, random_state = 42)
+# Success
+print("Training and testing split was successful.")
+
+#Build the model
+from sklearn.linear_model import LogisticRegression
+basemodel = LogisticRegression()
+basemodel.fit(X_train,Y_train)
+print("Training accuracy:", basemodel.score(X_train,Y_train)*100)
+
+#Make predictions on test data
+y_predict= basemodel.predict(X_test)
+print("Testing accuracy:", basemodel.score(X_test,Y_test)*100)
+     
+
+#Normalize the data using Min Max Normalization or any other technique
+from sklearn.preprocessing import MinMaxScaler
+scaler= MinMaxScaler()
+
+X = df[['Age','EstimatedSalary']]
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, Y_train, Y_test = train_test_split(X_scaled, Y,test_size= 0.2, random_state = 42)
+print("Training and testing split was successful.")
+
+model = LogisticRegression()
+model.fit(X_train, Y_train)
+y_predict = model.predict(X_test)
+print("Training accuracy:", model.score(X_train,Y_train)*100)
+print("Testing accuracy:", model.score(X_test,Y_test)*100)
+
+
+# Measure the performance of the model
+# Measure the accuracy
+# Measure the perormance using Precision, Recall, Fscore, Support etc.
+from sklearn.metrics import accuracy_score
+Acc = accuracy_score(Y_test,y_predict)
+print(Acc)
+
+from sklearn.metrics import confusion_matrix
+cm= confusion_matrix(Y_test,y_predict)
+print(cm)
+
+
+from sklearn.metrics import precision_recall_fscore_support
+prf = precision_recall_fscore_support(Y_test,y_predict)
+print('precision :',prf[0])
+print('recall :',prf[1])
+print('fscore :',prf[2])
+print('support :',prf[3])
+
+from sklearn.metrics import classification_report
+cr = classification_report(Y_test,y_predict)
+print(cr)

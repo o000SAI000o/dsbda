@@ -1,0 +1,62 @@
+# #Data Wrangling II 
+# Create an “Academic performance” dataset of students and perform the following operations using Python.
+# Scan all variables for missing values and inconsistencies. If there are missing values and/or inconsistencies, use any of the suitable techniques to deal with them.
+# Scan all numeric variables for outliers. If there are outliers, use any of the suitable techniques to deal with them.
+# Apply data transformations on at least one of the variables. The purpose of this transformation should be one of the following reasons: to change the scale for better understanding of the variable, to convert a non-linear relation into a linear one, or to decrease the skewness and convert the distribution into a normal distribution. Reason and document your approach properly.
+
+import numpy as np 
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy import stats
+
+data = pd.read_csv("tecdiv.csv")
+
+print(data)
+
+
+print("The first five rows are as follows: ")
+print(data.head())
+
+
+print("The last five rows are as follows: ")
+print(data.tail())
+
+
+# Describtion about the dataset
+print(data.describe())
+
+
+# Information about the dataset
+print(data.info())
+
+print("The column names of the dataset are as follows: ")
+print(data.columns)
+
+
+print(data.isnull().sum())
+
+# Extract the last 3 digits from roll numbers (e.g., TECOC342 --> 342)
+data['Roll no '] = data['Roll no '].str[-3:]
+print(data.head())
+
+sns.boxplot(y=data["First year:   Sem 1"])
+plt.show()
+
+sns.boxplot(y=data['First year:   Sem 2'])
+plt.show()
+
+sns.boxplot(y=data["Second year:   Sem 1"])
+plt.show()
+
+sns.boxplot(y=data["Second year:   Sem 2"])
+plt.show()
+
+# Identify outliers using Z-scores (threshold 3 is common)
+z_scores = np.abs(stats.zscore(data.select_dtypes(include=[np.number])))
+outliers = (z_scores > 3).all(axis=1)
+
+# Optionally, remove outliers or apply different strategies like capping.
+# Example: Drop rows where outliers are detected
+data_cleaned = data[~outliers]
+print(data_cleaned)

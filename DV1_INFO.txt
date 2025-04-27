@@ -1,0 +1,183 @@
+This code uses the **Titanic dataset** from Seaborn, performs data exploration and cleaning, and creates a variety of visualizations to understand different aspects of the dataset. Let's break down each part of the code and explain the steps and the visualizations created:
+
+### **Code Walkthrough**
+
+1. **Importing Libraries**
+   ```python
+   import numpy as np
+   import pandas as pd
+   import matplotlib.pyplot as plt
+   import seaborn as sns
+   ```
+   - `numpy`: Used for numerical operations.
+   - `pandas`: Used for data manipulation and handling.
+   - `matplotlib.pyplot`: Used for creating static plots.
+   - `seaborn`: Built on top of `matplotlib` and used for more advanced and aesthetically pleasing visualizations.
+
+2. **Loading the Titanic Dataset**
+   ```python
+   data = sns.load_dataset('titanic')
+   print(data)
+   ```
+   This loads the in-built Titanic dataset from Seaborn. It contains passenger details like `age`, `sex`, `pclass`, `fare`, `embarked`, and more.
+
+3. **Basic Data Exploration**
+   ```python
+   print(data.shape)
+   print(data.describe())
+   print(data.info())
+   print(data.describe(include='object'))
+   print(data.isnull().sum())
+   print(data.columns)
+   ```
+   - `data.shape`: Displays the number of rows and columns.
+   - `data.describe()`: Provides summary statistics for numerical columns (like `mean`, `min`, `max`, etc.).
+   - `data.info()`: Gives information about the dataset, including non-null counts and data types.
+   - `data.describe(include='object')`: Provides summary statistics for categorical (object) columns.
+   - `data.isnull().sum()`: Shows the count of missing values in each column.
+   - `data.columns`: Displays the column names in the dataset.
+
+4. **Handling Missing Data**
+   ```python
+   data['age'] = data['age'].fillna(data['age'].mean())
+   data['deck'] = data['deck'].fillna(data['deck'].mode()[0])
+   data['embarked'] = data['embarked'].fillna(data['embarked'].mode()[0])
+   print(data.isnull().sum())
+   ```
+   - **`fillna()`** is used to handle missing values:
+     - For `age`, missing values are filled with the **mean** of the `age` column.
+     - For `deck`, missing values are filled with the **mode** (most frequent value) of the `deck` column.
+     - For `embarked`, missing values are filled with the **mode** of the `embarked` column.
+
+5. **Visualizations**
+
+   **Count Plots**
+   ```python
+   sns.countplot(x=data['survived'])
+   plt.show()
+
+   sns.countplot(x=data['pclass'])
+   plt.show()
+
+   sns.countplot(x=data['embarked'])
+   plt.show()
+
+   sns.countplot(x=data['sex'])
+   plt.show()
+   ```
+   - These `countplot()` visualizations show the distribution of the following categorical variables:
+     - `survived`: Number of passengers who survived vs. those who didn't.
+     - `pclass`: Distribution of passengers by class (1st, 2nd, 3rd).
+     - `embarked`: Distribution of passengers by embarkation point (C = Cherbourg, Q = Queenstown, S = Southampton).
+     - `sex`: Distribution of passengers by gender (male/female).
+
+   **Box Plots**
+   ```python
+   sns.boxplot(x=data['age'])
+   plt.show()
+
+   sns.boxplot(x=data['fare'])
+   plt.show()
+
+   sns.boxplot(x=data['pclass'])
+   plt.show()
+
+   sns.boxplot(x=data['sibsp'])
+   plt.show()
+   ```
+   - These boxplots display the distribution of numerical variables (`age`, `fare`, `pclass`, `sibsp`) and help identify outliers.
+
+   **Categorical Plots (Catplot)**
+   ```python
+   sns.catplot(x='pclass', y='age', data=data, kind='box')
+   plt.show()
+
+   sns.catplot(x='pclass', y='fare', data=data, kind='strip')
+   plt.show()
+
+   sns.catplot(x='sex', y='fare', data=data, kind='strip')
+   plt.show()
+
+   sns.catplot(x='sex', y='age', data=data, kind='strip')
+   plt.show()
+   ```
+   - **`catplot()`** creates categorical plots to compare variables:
+     - A boxplot of `age` by `pclass` shows the spread of ages across different passenger classes.
+     - A strip plot of `fare` by `pclass` shows the individual fare distribution across passenger classes.
+     - Similar strip plots for `sex` by `fare` and `sex` by `age` show how `fare` and `age` vary by gender.
+
+   **Pairplot**
+   ```python
+   sns.pairplot(data)
+   plt.show()
+   ```
+   - A **pairplot** shows pairwise relationships between numerical columns. It’s useful for visualizing the correlations between variables.
+
+   **Scatter Plots**
+   ```python
+   sns.scatterplot(x='fare', y='pclass', hue='survived', data=data)
+   plt.show()
+
+   sns.scatterplot(x='survived', y='fare', data=data)
+   plt.show()
+   ```
+   - The **scatterplot** for `fare` vs `pclass` with `survived` as hue shows how fare varies with class and survival.
+   - The second scatterplot of `survived` vs `fare` shows how fare is distributed across survival status.
+
+   **Distribution Plots**
+   ```python
+   sns.distplot(data['age'])
+   plt.show()
+
+   sns.distplot(data['fare'])
+   plt.show()
+   ```
+   - **`distplot()`** is used to visualize the distribution of `age` and `fare` for passengers.
+     - The `age` distribution might show a skew towards younger passengers.
+     - The `fare` distribution might be skewed with a long tail (some passengers had very high fares).
+
+   **Joint Plot**
+   ```python
+   sns.jointplot(x='survived', y='fare', kind="scatter", data=data)
+   plt.show()
+   ```
+   - The **`jointplot()`** shows the relationship between `survived` and `fare`. It uses a scatter plot with additional histograms on the axes.
+
+6. **Correlation Heatmap**
+   ```python
+   tc = data.select_dtypes(include=['number']).corr()
+   sns.heatmap(tc, cmap="YlGnBu")
+   plt.title('Correlation')
+   plt.show()
+   ```
+   - The **correlation heatmap** shows correlations between numerical variables. It helps identify which variables are highly correlated.
+
+7. **Bar Plot for 'pclass' vs 'fare'**
+   ```python
+   sns.catplot(x='pclass', y='fare', data=data, kind='bar')
+   plt.show()
+   ```
+   - This bar plot shows the average fare for each passenger class (`pclass`).
+
+8. **Histogram for 'fare'**
+   ```python
+   plt.figure(figsize=(10, 6))
+   sns.histplot(data['fare'], bins=30, kde=True, color='skyblue')
+   plt.title('Distribution of Ticket Fare on Titanic', fontsize=16)
+   plt.xlabel('fare', fontsize=14)
+   plt.ylabel('Number of Passengers', fontsize=14)
+   plt.grid(True, linestyle='--', alpha=0.6)
+   plt.show()
+   ```
+   - A **histogram** with a **kernel density estimate (KDE)** is used to show the distribution of the `fare` variable.
+   - The grid, labels, and title enhance the clarity of the plot.
+
+### **Summary of Observations**
+
+- **Survival Status**: Most passengers did not survive, as shown by the `survived` count plot.
+- **Passenger Class**: Most passengers were in 3rd class, as indicated by the `pclass` count plot.
+- **Age Distribution**: The age distribution is skewed with more younger passengers, as shown in the histogram and boxplot.
+- **Fare Distribution**: A few passengers paid very high fares, as shown by the long tail in the `fare` distribution.
+- **Gender and Survival**: There might be gender-based survival patterns, which could be explored further with `survived` vs `sex`.
+
+This comprehensive analysis and visualization help to understand the Titanic dataset from various perspectives, including distributions, correlations, and survival analysis.

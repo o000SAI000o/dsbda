@@ -1,0 +1,142 @@
+Your code is a complete workflow for building and evaluating a **Logistic Regression** model on a **Social Network Ads** dataset. It performs several tasks, including data preprocessing, model training, and performance evaluation. Here's an explanation of each step:
+
+### **1. Data Loading and Preprocessing**
+```python
+df = pd.read_csv("Social_Network_Ads.csv")
+print(df.shape)
+print(df.head())
+```
+- The dataset **`Social_Network_Ads.csv`** is loaded into a Pandas DataFrame (`df`).
+- The shape and first few rows of the dataset are printed to understand its structure.
+
+```python
+df.drop(['User ID'], axis=1, inplace=True)
+print(df.head())
+```
+- The **`User ID`** column is dropped from the DataFrame as it seems irrelevant for prediction.
+
+### **2. Exploratory Data Analysis (EDA)**
+```python
+print(df.Purchased.value_counts())
+print(df.Gender.value_counts())
+print(df.dtypes)
+print(df.isnull().sum())
+print(df.describe())
+```
+- **`Purchased.value_counts()`** and **`Gender.value_counts()`** give the count of unique values in each column.
+- **`df.dtypes`** shows the data types of each column.
+- **`df.isnull().sum()`** checks for any missing values.
+- **`df.describe()`** provides summary statistics of the numerical columns.
+
+### **3. Visualizations**
+#### **Bar plot for Gender vs Purchased**
+```python
+g = sns.catplot(x="Gender", y="Purchased", data=df, kind="bar", height=4)
+g.set_ylabels("Purchased Probability")
+plt.show()
+```
+- A **bar plot** is used to visualize the relationship between `Gender` and `Purchased`.
+
+#### **Stacked Bar Plot for Gender vs Purchased**
+```python
+M2 = pd.crosstab(df.Gender, df.Purchased, normalize="index")
+M2.plot.bar(figsize=(6, 4), stacked=True)
+plt.legend(title='Gender vs Purchased', loc='upper right')
+plt.show()
+```
+- **`crosstab`** creates a cross-tabulation of `Gender` and `Purchased`, normalized by the index (gender), and then a stacked bar plot is generated to show proportions.
+
+#### **Correlation Heatmap**
+```python
+corr = df.select_dtypes(include=['number']).corr()
+plt.figure(figsize=(8,8))
+sns.heatmap(corr, cbar=True, square=True, fmt='.1f', annot=True, annot_kws={'size':12}, cmap='Greens')
+```
+- **Correlation matrix** is computed for numerical features, and a **heatmap** is plotted to show the relationships between features.
+
+### **4. Feature and Target Separation**
+```python
+X = df.drop(['Gender', 'Purchased'], axis=1)
+Y = df['Purchased']
+print(X.head())
+```
+- The feature variables (`X`) are created by dropping `Gender` and `Purchased` columns.
+- The target variable (`Y`) is the `Purchased` column.
+
+### **5. Train-Test Split**
+```python
+from sklearn.model_selection import train_test_split
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+print("Training and testing split was successful.")
+```
+- The data is split into **training** and **testing** sets with 80% for training and 20% for testing.
+
+### **6. Logistic Regression Model**
+#### **Train the Model**
+```python
+from sklearn.linear_model import LogisticRegression
+basemodel = LogisticRegression()
+basemodel.fit(X_train, Y_train)
+print("Training accuracy:", basemodel.score(X_train, Y_train) * 100)
+```
+- A **Logistic Regression** model is trained on the training data.
+
+#### **Make Predictions and Evaluate**
+```python
+y_predict = basemodel.predict(X_test)
+print("Testing accuracy:", basemodel.score(X_test, Y_test) * 100)
+```
+- Predictions are made on the test data, and the **testing accuracy** is computed.
+
+### **7. Data Normalization**
+```python
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+X_scaled = scaler.fit_transform(X)
+X_train, X_test, Y_train, Y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
+print("Training and testing split was successful.")
+```
+- The features `Age` and `EstimatedSalary` are **normalized** using MinMax scaling to bring the values between 0 and 1.
+
+#### **Train the Normalized Model**
+```python
+model = LogisticRegression()
+model.fit(X_train, Y_train)
+y_predict = model.predict(X_test)
+print("Training accuracy:", model.score(X_train, Y_train) * 100)
+print("Testing accuracy:", model.score(X_test, Y_test) * 100)
+```
+- A new Logistic Regression model is trained on the normalized features and evaluated.
+
+### **8. Model Evaluation Using Metrics**
+```python
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_fscore_support, classification_report
+
+Acc = accuracy_score(Y_test, y_predict)
+print(Acc)
+
+cm = confusion_matrix(Y_test, y_predict)
+print(cm)
+
+prf = precision_recall_fscore_support(Y_test, y_predict)
+print('precision :', prf[0])
+print('recall :', prf[1])
+print('fscore :', prf[2])
+print('support :', prf[3])
+
+cr = classification_report(Y_test, y_predict)
+print(cr)
+```
+- **Accuracy** is computed using `accuracy_score`.
+- **Confusion Matrix** is printed to assess the performance of the model.
+- **Precision, Recall, F-Score, and Support** are computed using `precision_recall_fscore_support`.
+- **Classification Report** is generated to show detailed performance metrics.
+
+### **Summary**
+This code covers the entire process of working with the Social Network Ads dataset:
+1. **Data preprocessing** (removing unnecessary columns, handling missing data, visualizations).
+2. **Feature scaling** (using MinMaxScaler).
+3. **Logistic Regression** model training and evaluation.
+4. **Model performance metrics** (accuracy, confusion matrix, precision, recall, F-score).
+
+By the end, you will have a trained logistic regression model that predicts whether a person will purchase an item based on age and estimated salary.
